@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TELA 1 — PAINEL DO OPERADOR | PROGRAMA SILVIO SHOW</title>
+  <link rel="icon" type="image/jpeg" href="Silvio%20Show%20imagens/logo%20silvio%20show%20fundo%20preto.jpeg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- TOP HEADER: STATUS DO SISTEMA E SAÍDA DE TELÃO (TELA 2) -->
+  <header class="top-header">
+    <div class="brand-area">
+      <img
+        src="Silvio%20Show%20imagens/logo%20silvio%20show%20fundo%20preto.jpeg"
+        alt="Logo Silvio Show"
+        class="brand-logo-img"
+      />
+      <div>
+        <div class="brand-title">PROGRAMA SILVIO SHOW — MESA TÉCNICA</div>
+        <div class="brand-subtitle">TELA 1: PAINEL DO OPERADOR • ZERO DELAY (RAM) • @Silvio_show</div>
+      </div>
+    </div>
+
+    <div class="telemetry-area">
+      <!-- Status de Pré-carregamento em RAM -->
+      <div class="status-pill" id="ram-status-pill" title="Todos os áudios e vídeos decodificados na memória RAM para disparo imediato">
+        <span class="dot online" id="ram-dot"></span>
+        <span id="ram-status-text">⚡ RAM PRONTA: Carregando...</span>
+      </div>
+
+      <!-- Medidor VU Master -->
+      <div class="vu-wrap" title="Nível de Saída de Áudio Master">
+        <span class="vu-label">SAÍDA MASTER</span>
+        <div class="vu-bar-bg">
+          <div class="vu-bar-fill" id="master-vu-fill"></div>
+        </div>
+      </div>
+
+      <!-- Status da Tela 2 (Telão / Palco) -->
+      <div class="status-pill" id="stage-status-pill">
+        <span class="dot warn" id="stage-dot"></span>
+        <span id="stage-status-text">TELA 2 (TELÃO): DESCONECTADA</span>
+      </div>
+    </div>
+
+    <div class="stage-actions">
+      <button class="btn btn-primary-stage" id="btn-open-stage" title="Abre a janela limpa da Tela 2 para arrastar ao projetor/LED e colocar em Tela Cheia">
+        🖥️ Abrir Tela 2 (Telão)
+      </button>
+      <button class="btn" id="btn-fullscreen-stage" title="Envia comando de Tela Cheia para a Tela 2">
+        ⛶ Tela Cheia
+      </button>
+      <button class="btn" id="btn-config-standby" title="Personalizar a imagem/logo ou animação de descanso do Telão">
+        🖼️ Tela de Descanso
+      </button>
+    </div>
+  </header>
+
+  <!-- MASTER CONTROL DECK: DUCKING (TALKOVER), TRANSIÇÃO VÍDEO E EMERGÊNCIA -->
+  <section class="master-deck">
+    <div class="deck-group">
+      <button class="btn-ducking" id="btn-ducking-toggle" title="Atalho: Tecla [D] — Baixa suavemente o volume das Trilhas de Fundo / Cama enquanto o apresentador fala">
+        <span>🎙️ DUCKING / TALKOVER (BAIXAR CAMA)</span>
+        <span class="hotkey-badge">[Tecla D]</span>
+      </button>
+
+      <div class="duck-config">
+        <label for="duck-level-slider">Nível do Ducking: <span id="duck-level-label">20%</span></label>
+        <input type="range" id="duck-level-slider" min="5" max="50" value="20" step="5" />
+      </div>
+
+      <div class="video-behavior-box" title="Define o que acontece com a trilha de fundo quando um vídeo é disparado para a Tela 2">
+        <label for="select-video-duck-behavior">Quando Vídeo Tocar no Telão:</label>
+        <select id="select-video-duck-behavior">
+          <option value="duck" selected>Baixar Trilha de Fundo (Auto-Ducking 20%)</option>
+          <option value="cut">Cortar Trilha de Fundo (Fade Out)</option>
+          <option value="none">Manter Trilha no Volume Atual</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="deck-group">
+      <button class="btn-fadeout" id="btn-master-fadeout" title="Atalho: Tecla [F] — Baixa suavemente todos os áudios e vídeos em 2 segundos">
+        📉 FADE OUT SUAVE (2s) <span class="hotkey-badge">[F]</span>
+      </button>
+
+      <button class="btn-panic-stop" id="btn-master-stop" title="Atalho: [ESPAÇO] ou [ESC] — Corta imediatamente todos os sons e volta o Telão para a Tela de Descanso">
+        🛑 STOP EMERGÊNCIA <span class="hotkey-badge">[ESPAÇO]</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- BARRA DE BANCOS POR MOMENTO DO SHOW + IMPORTAÇÃO -->
+  <nav class="banks-nav-bar">
+    <div class="bank-tabs" id="bank-tabs">
+      <button class="bank-tab active" data-bank="all">
+        🌟 Visão Completa <span class="bank-count" id="count-all">0</span>
+      </button>
+      <button class="bank-tab" data-bank="abertura">
+        🎺 1. Abertura e Entrada <span class="bank-count" id="count-abertura">0</span>
+      </button>
+      <button class="bank-tab" data-bank="trilhas">
+        🎵 2. Trilhas de Fundo / Cama <span class="bank-count" id="count-trilhas">0</span>
+      </button>
+      <button class="bank-tab" data-bank="efeitos">
+        😂 3. Efeitos e Vinhetas de Humor <span class="bank-count" id="count-efeitos">0</span>
+      </button>
+      <button class="bank-tab" data-bank="videos">
+        🎬 4. Vídeos e Telão (Tela 2) <span class="bank-count" id="count-videos">0</span>
+      </button>
+    </div>
+
+    <div class="stage-actions">
+      <input type="file" id="quick-file-input" multiple accept="audio/*,video/*,image/*" style="display:none" />
+      <button class="btn" id="btn-quick-import" title="Importar vários arquivos de áudio ou vídeo do computador de uma só vez">
+        📂 Importar Arquivos (Drag &amp; Drop)
+      </button>
+      <button class="btn" id="btn-new-pad" title="Criar e configurar um novo botão personalizado">
+        ➕ Novo Botão
+      </button>
+      <button class="btn" id="btn-reset-demo" title="Restaurar os botões originais de demonstração do Silvio Show">
+        🔄 Restaurar Kit Demo
+      </button>
+    </div>
+  </nav>
+
+  <!-- WORKSPACE PRINCIPAL: GRADE DE BOTÕES + BARRA LATERAL -->
+  <main class="workspace">
+    <!-- GRADE DE BANCOS E PADS -->
+    <div class="pads-container" id="pads-container">
+      <!-- Renderizado dinamicamente via app.js -->
+    </div>
+
+    <!-- BARRA LATERAL: MONITOR DO TELÃO, CANAIS ATIVOS E LISTA DE ESPERA -->
+    <aside class="right-sidebar">
+      <!-- Bloco 1: Monitor em Tempo Real da Tela 2 (Telão) -->
+      <div class="sidebar-block">
+        <div class="sidebar-title">
+          <span>📺 RETORNO DO TELÃO (TELA 2)</span>
+          <button class="pad-mini-btn" id="btn-clear-stage" title="Voltar o Telão imediatamente para a imagem de descanso">
+            Voltar p/ Descanso
+          </button>
+        </div>
+        <div class="stage-mini-preview">
+          <div class="stage-mini-thumb-wrap">
+            <img
+              id="stage-mini-thumb"
+              src="Silvio%20Show%20imagens/imagem%20programa%20silvio%20show.jpeg"
+              alt="Preview da Tela de Espera"
+            />
+            <div class="stage-mini-overlay-badge">
+              <span class="stage-mini-status" id="stage-mini-badge">🟢 TELA DE ESPERA NO AR</span>
+            </div>
+          </div>
+          <div class="stage-mini-name" id="stage-mini-title">Arte Oficial: Programa Silvio Show</div>
+          <div class="stage-mini-progress">
+            <div class="stage-mini-progress-fill" id="stage-mini-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 2: Canais em Execução Agora -->
+      <div class="sidebar-block">
+        <div class="sidebar-title">
+          <span>🔊 NO AR AGORA (CANAIS ATIVOS)</span>
+          <span id="active-channels-count">0 ativos</span>
+        </div>
+        <div class="active-channels-list" id="active-channels-list">
+          <div class="empty-hint">Nenhum áudio ou vídeo tocando no momento.</div>
+        </div>
+      </div>
+
+      <!-- Bloco 3: Lista de Espera (Next Queue) -->
+      <div class="queue-section">
+        <div class="sidebar-title">
+          <span>📋 LISTA DE ESPERA (SEQUÊNCIA)</span>
+          <button class="pad-mini-btn" id="btn-clear-queue">Limpar Fila</button>
+        </div>
+
+        <button class="btn-fire-next" id="btn-fire-next" disabled title="Atalho: Tecla [ENTER] — Dispara imediatamente o primeiro item da lista de espera">
+          ▶️ DISPARAR PRÓXIMO <span class="hotkey-badge">[ENTER]</span>
+        </button>
+
+        <div class="queue-list" id="queue-list">
+          <div class="empty-hint">
+            Clique em <strong>"+ Fila"</strong> em qualquer botão para montar a sequência do show.
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- MODAL 1: CRIAR / EDITAR BOTÃO (PAD) -->
+  <div class="modal-backdrop" id="modal-pad">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-pad-title">Configurar Botão do Painel</h3>
+        <button class="pad-mini-btn" id="btn-close-pad-modal">✕</button>
+      </div>
+      <form id="form-pad" class="form-grid">
+        <input type="hidden" id="pad-id-input" />
+
+        <div class="form-group">
+          <label for="pad-title-input">Nome do Botão (Exibido na Mesa):</label>
+          <input type="text" id="pad-title-input" required placeholder="Ex: Silvio Santos Vem Aí / Risada Auditório" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pad-bank-input">Banco / Momento do Show:</label>
+            <select id="pad-bank-input">
+              <option value="abertura">1. Abertura e Entrada</option>
+              <option value="trilhas">2. Trilhas de Fundo / Cama</option>
+              <option value="efeitos">3. Efeitos e Vinhetas de Humor</option>
+              <option value="videos">4. Vídeos e Telão (Tela 2)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="pad-mode-input">Modo de Transição:</label>
+            <select id="pad-mode-input">
+              <option value="exclusive">Exclusivo (Corta o anterior)</option>
+              <option value="overlay">Sobreposição (Toca por cima)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pad-color-input">Cor do Botão:</label>
+            <select id="pad-color-input">
+              <option value="#f59e0b">Dourado / Âmbar (Abertura)</option>
+              <option value="#3b82f6">Azul Royal Silvio Show (Trilha / Cama)</option>
+              <option value="#10b981">Verde Esmeralda (Efeito / Humor)</option>
+              <option value="#f43f5e">Vermelho Coral (Impacto / Buzina)</option>
+              <option value="#8b5cf6">Roxo Broadcast (Telão / Vídeo)</option>
+              <option value="#06b6d4">Ciano Neon (Quadros)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="pad-hotkey-input">Atalho no Teclado (1 tecla):</label>
+            <input type="text" id="pad-hotkey-input" maxlength="2" placeholder="Ex: 1, 2, Q, W" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="pad-file-input">Arquivo de Áudio / Vídeo / Imagem (Pré-carregado na RAM):</label>
+          <input type="file" id="pad-file-input" accept="audio/*,video/*,image/*" />
+          <small style="color:#94a3b8;font-size:0.72rem;" id="pad-file-current-info">
+            Selecione um arquivo do computador (.mp3, .wav, .mp4, .webm, .png, .jpg) ou mantenha o som atual.
+          </small>
+        </div>
+
+        <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;">
+          <input type="checkbox" id="pad-loop-input" />
+          <label for="pad-loop-input" style="cursor:pointer;">Repetir continuamente em Loop (Ideal para Trilhas de Fundo / Cama)</label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn" id="btn-cancel-pad-modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary-stage">💾 Salvar na RAM</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CONFIGURAR TELA DE DESCANSO DO TELÃO (STANDBY TELA 2) -->
+  <div class="modal-backdrop" id="modal-standby">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🖼️ Configurar Tela de Espera do Telão (Tela 2)</h3>
+        <button class="pad-mini-btn" id="btn-close-standby-modal">✕</button>
+      </div>
+      <form id="form-standby" class="form-grid">
+        <div class="form-group">
+          <label for="standby-mode-input">Visual da Tela de Espera quando não há vídeo tocando:</label>
+          <select id="standby-mode-input">
+            <option value="default" selected>Arte Principal Oficial: "Programa Silvio Show" (Widescreen Azul)</option>
+            <option value="logo_dark">Logo Oficial Microfone: "Silvio Show" (Fundo Escuro)</option>
+            <option value="custom">Outra Imagem ou Vídeo em Loop Enviado do Computador</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;">
+          <input type="checkbox" id="standby-effects-input" checked />
+          <label for="standby-effects-input" style="cursor:pointer;">
+            Ativar iluminação de palco e partículas animadas suaves sobre a Tela de Espera
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="standby-file-input">Ou envie uma imagem/vídeo adicional (.png, .jpg, .mp4):</label>
+          <input type="file" id="standby-file-input" accept="image/*,video/*" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn" id="btn-cancel-standby-modal">Fechar</button>
+          <button type="submit" class="btn btn-primary-stage">Aplicar no Telão Agora</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="audio-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TELA 2 — SAÍDA DE TELÃO / PALCO (PROGRAMA SILVIO SHOW)</title>
+  <link rel="icon" type="image/jpeg" href="Silvio%20Show%20imagens/logo%20silvio%20show%20fundo%20preto.jpeg" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #00081c;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      cursor: none; /* Oculta o mouse no projetor/painel de LED */
+    }
+
+    /* Camada 1: Tela de Descanso Oficial (Standby) */
+    #standby-layer {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: opacity 0.35s ease;
+      background: radial-gradient(circle at 50% 50%, #00247d 0%, #000b29 70%, #000412 100%);
+      overflow: hidden;
+    }
+
+    #standby-layer.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Arte Principal Widescreen do Programa Silvio Show */
+    #default-standby {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #000c2e;
+    }
+
+    #official-standby-bg {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      animation: subtleBreath 10s ease-in-out infinite;
+      filter: contrast(1.04) saturate(1.06);
+    }
+
+    /* Modo Alternativo: Logo Microfone Fundo Escuro Centralizada */
+    #logo-only-standby {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 50%, #1c1d21 0%, #0a0b0e 75%, #000000 100%);
+    }
+
+    #official-logo-center {
+      max-width: 62vw;
+      max-height: 78vh;
+      border-radius: 24px;
+      box-shadow: 0 0 80px rgba(0, 195, 255, 0.25);
+      animation: floatLogo 6s ease-in-out infinite;
+    }
+
+    /* Canvas de Brilho / Partículas de Palco sobre a Tela de Espera */
+    #standby-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 3;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes subtleBreath {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.025); }
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-10px) scale(1.03); }
+    }
+
+    /* Imagem ou Vídeo Customizado de Descanso */
+    #custom-standby-img,
+    #custom-standby-video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      display: none;
+      z-index: 2;
+    }
+
+    /* Camada 2: Reprodutor de Vídeo / Vinheta Ativa em Tela Cheia */
+    #active-media-layer {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #active-media-layer.active {
+      opacity: 1;
+    }
+
+    #stage-video-player {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      background: #000;
+      display: none;
+    }
+
+    #stage-image-player {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      background: #000;
+      display: none;
+    }
+
+    #stage-synth-canvas {
+      width: 100vw;
+      height: 100vh;
+      display: none;
+    }
+
+    /* Dica rápida de Tela Cheia (some automaticamente e fica invisível em Fullscreen) */
+    #fullscreen-hint {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 100;
+      background: rgba(3, 18, 56, 0.9);
+      border: 1px solid rgba(0, 212, 255, 0.6);
+      color: #e0f2fe;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    body.show-hint:not(:fullscreen) #fullscreen-hint {
+      opacity: 1;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Camada 1: Tela de Descanso Oficial (Standby) -->
+  <div id="standby-layer">
+    <!-- Opção 1 (Padrão): Imagem Principal Widescreen do Programa Silvio Show -->
+    <div id="default-standby">
+      <img
+        id="official-standby-bg"
+        src="Silvio%20Show%20imagens/imagem%20programa%20silvio%20show.jpeg"
+        alt="Programa Silvio Show - Tela de Espera"
+      />
+    </div>
+
+    <!-- Opção 2: Logo Microfone Fundo Preto em Destaque -->
+    <div id="logo-only-standby">
+      <img
+        id="official-logo-center"
+        src="Silvio%20Show%20imagens/logo%20silvio%20show%20fundo%20preto.jpeg"
+        alt="Logo Silvio Show"
+      />
+    </div>
+
+    <!-- Opção 3: Mídia Extra Enviada pelo Operador -->
+    <img id="custom-standby-img" alt="Tela de Descanso Personalizada" />
+    <video id="custom-standby-video" muted loop playsinline></video>
+
+    <!-- Efeito de Luzes / Partículas Suaves sobre a Tela de Espera -->
+    <canvas id="standby-canvas"></canvas>
+  </div>
+
+  <!-- Camada 2: Mídia Ativa (Vídeos / Vinhetas / Chamadas de Quadros) -->
+  <div id="active-media-layer">
+    <video id="stage-video-player" playsinline preload="auto"></video>
+    <img id="stage-image-player" alt="Mídia em Exibição" />
+    <canvas id="stage-synth-canvas"></canvas>
+  </div>
+
+  <div id="fullscreen-hint" title="Clique ou pressione F11 para Tela Cheia">
+    🖥️ Duplo clique ou F11 para Tela Cheia no Projetor / LED
+  </div>
+
+  <script src="db.js"></script>
+  <script src="stage.js"></script>
+</body>
+</html>
